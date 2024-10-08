@@ -22,7 +22,7 @@ SOFTWARE.
 import sqlite3  # library for database
 
 from termcolor import colored
-
+import sys
 
 class DatabaseConnection:
     """ Class of database entries for user's information."""
@@ -30,70 +30,120 @@ class DatabaseConnection:
     def __init__(self):
         """Used to create database and then to connect with generated databse file
         Checked for table is created? if not then created as per required values """
-        self.con = sqlite3.connect("generated_password.db")
-        self.cursor_obj = self.con.cursor()
-        self.cursor_obj.execute(
-            """CREATE TABLE IF NOT EXISTS passwords(
-            id integer PRIMARY KEY,portal_name text NOT NULL UNIQUE, password varchar,
-            creation_date varchar, email varchar, portal_url varchar)
-            """
-        )
-        self.con.commit()
+        try:
+            self.con = sqlite3.connect("generated_password.db")
+            self.cursor_obj = self.con.cursor()
+            self.cursor_obj.execute(
+                """CREATE TABLE IF NOT EXISTS passwords(
+                id integer PRIMARY KEY,portal_name text NOT NULL UNIQUE, password varchar,
+                creation_date varchar, email varchar, portal_url varchar)
+                """
+            )
+            self.con.commit()
+        except  sqlite3.Error as e:
+            # Catch any SQLite error and print the error message
+            print(f"Database error occurred: {e}")
+            sys.exit(1)  # Exit the program if a database error occurs
+
+        except Exception as e:
+            # Catch any other exceptions and print the error message
+            print(f"An error occurred: {e}")
+            sys.exit(1)  # Exit the program if an unexpected error occurs
+
 
     def insert_data(self, portal_name, password, creation_date, email, portal_url):
         """Adding values into database"""
-        self.password = password
-        self.creation_date = creation_date
-        self.email = email
-        self.portal_name = portal_name
-        self.portal_url = portal_url
         try:
             self.cursor_obj.execute(
                 """INSERT INTO passwords
                 (portal_name, password, creation_date, email, portal_url)
                 VALUES (?, ?, ?, ?, ?)""",
-                (self.portal_name, self.password, self.creation_date, self.email, self.portal_url),
+                (portal_name, password, creation_date, email, portal_url),
             )
+            self.con.commit()
         except sqlite3.IntegrityError:
             print(
-                colored("Already exists with the same name. Try with another Portal_name", "green")
+                colored(f"Error: A record with the portal name '{portal_name}' already exists.", "green")
             )
-        self.con.commit()
+
+        except sqlite3.Error as e:
+            print(f"Database error occurred while inserting data: {e}")
+        
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
 
     def delete_data(self, portal_name):
         """Deleting values from database"""
-        self.portal_name = portal_name
-        self.cursor_obj.execute(
-            """DELETE from passwords where portal_name = ?""", (self.portal_name,)
-        )
-        self.con.commit()
+        try:
+            self.cursor_obj.execute(
+                """DELETE from passwords where portal_name = ?""", (portal_name,)
+            )
+            self.con.commit()
+            print(f"Data for portal '{portal_name}' deleted successfully.")
+
+        except sqlite3.Error as e:
+            print(f"Database error occurred while deleting data: {e}")
+
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
 
     def update_data(self, portal_name, password):
         """Updating values in database"""
-        self.portal_name = portal_name
-        self.password = password
-        self.cursor_obj.execute(
-            """UPDATE passwords SET password =? WHERE portal_name =?""",
-            (self.password, self.portal_name),
-        )
-        self.con.commit()
+        try:
+            self.cursor_obj.execute(
+                """UPDATE passwords SET password =? WHERE portal_name =?""",
+                (password, portal_name),
+            )
+            self.con.commit()
+            print(f"Password for portal '{portal_name}' updated successfully.")
+
+        except sqlite3.Error as e:
+            print(f"Database error occurred while updating data: {e}")
+        
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
 
     def show_data(self, portal_name):
         """All inserted data will showed"""
-        self.portal_name = portal_name
-        self.cursor_obj.execute(
-            """SELECT password FROM passwords WHERE portal_name=?""", (self.portal_name,)
-        )
-        rows = self.cursor_obj.fetchall()
+        try:
+            self.cursor_obj.execute(
+                """SELECT password FROM passwords WHERE portal_name=?""", (portal_name,)
+            )
+            row = self.cursor_obj.fetchone()
 
-        for row in rows:
-            return row[0]
-
-        self.con.commit()
+            if row:
+                return row[0]
+            else:
+                print(f"No data found for portal '{portal_name}'.")
+                return None
+        except sqlite3.Error as e:
+            print(f"Database error occurred while fetching data: {e}")
+        
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
 
     def show_all_data(self):
         """Showing all data saved in database"""
-        self.cursor_obj.execute("""SELECT * FROM passwords""")
-        rows = self.cursor_obj.fetchall()
-        return rows
-        self.con.commit()
+        try:
+            self.cursor_obj.execute("""SELECT * FROM passwords""")
+            rows = self.cursor_obj.fetchall()
+            return rows
+
+        except sqlite3.Error as e:
+            print(f"Database error occurred while fetching all data: {e}")
+        
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+
+    def close_connection(self):
+        """Safely close the database connection."""
+        try:
+            if self.con:
+                self.con.close()
+                print("Database connection closed successfully.")
+        
+        except sqlite3.Error as e:
+            print(f"Error closing the database connection: {e}")
+        
+        except Exception as e:
+            print(f"An unexpected error occurred while closing the connection: {e}")

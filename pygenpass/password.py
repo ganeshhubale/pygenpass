@@ -50,6 +50,8 @@ def all():
     for row in all_pass:
         table.append_row([row[0], row[1], row[2], row[3], row[4], row[5]])
     print(table)
+    db_obj.close_connection()
+
 
 
 @click.command(help="Delete password")
@@ -61,6 +63,7 @@ def delete():
         print("No records found")
     else:
         db_obj.delete_data(portal_name=portal_name)
+    db_obj.close_connection()
 
 
 @click.command(help="Update password")
@@ -73,6 +76,7 @@ def modify():
     else:
         mod = click.prompt("Enter new password", default="None", hide_input=True)
         db_obj.update_data(portal_name=portal_name, password=mod)
+    db_obj.close_connection()
 
 
 @click.command(help="Add existing passwords")
@@ -90,6 +94,8 @@ def add():
         email=email,
         portal_url=portal_url,
     )
+    db_obj.close_connection()
+
 
 
 @click.command(help="Create new password")
@@ -107,6 +113,8 @@ def create():
         email=email,
         portal_url=portal_url,
     )
+    db_obj.close_connection()
+
 
 
 @click.command(help="Show password")
@@ -117,3 +125,4 @@ def show():
         print(colored("No records found", "green"))
     else:
         print(spass)
+    db_obj.close_connection()
