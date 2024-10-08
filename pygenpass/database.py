@@ -20,16 +20,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import sqlite3  # library for database
-
-from termcolor import colored
 import sys
 
+from termcolor import colored
+
+
 class DatabaseConnection:
-    """ Class of database entries for user's information."""
+    """Class of database entries for user's information."""
 
     def __init__(self):
         """Used to create database and then to connect with generated databse file
-        Checked for table is created? if not then created as per required values """
+        Checked for table is created? if not then created as per required values"""
         try:
             self.con = sqlite3.connect("generated_password.db")
             self.cursor_obj = self.con.cursor()
@@ -40,7 +41,7 @@ class DatabaseConnection:
                 """
             )
             self.con.commit()
-        except  sqlite3.Error as e:
+        except sqlite3.Error as e:
             # Catch any SQLite error and print the error message
             print(f"Database error occurred: {e}")
             sys.exit(1)  # Exit the program if a database error occurs
@@ -49,7 +50,6 @@ class DatabaseConnection:
             # Catch any other exceptions and print the error message
             print(f"An error occurred: {e}")
             sys.exit(1)  # Exit the program if an unexpected error occurs
-
 
     def insert_data(self, portal_name, password, creation_date, email, portal_url):
         """Adding values into database"""
@@ -63,12 +63,15 @@ class DatabaseConnection:
             self.con.commit()
         except sqlite3.IntegrityError:
             print(
-                colored(f"Error: A record with the portal name '{portal_name}' already exists.", "green")
+                colored(
+                    f"Error: A record with the portal name '{portal_name}' already exists.",
+                    "green",
+                )
             )
 
         except sqlite3.Error as e:
             print(f"Database error occurred while inserting data: {e}")
-        
+
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
 
@@ -99,7 +102,7 @@ class DatabaseConnection:
 
         except sqlite3.Error as e:
             print(f"Database error occurred while updating data: {e}")
-        
+
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
 
@@ -118,7 +121,7 @@ class DatabaseConnection:
                 return None
         except sqlite3.Error as e:
             print(f"Database error occurred while fetching data: {e}")
-        
+
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
 
@@ -131,7 +134,7 @@ class DatabaseConnection:
 
         except sqlite3.Error as e:
             print(f"Database error occurred while fetching all data: {e}")
-        
+
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
 
@@ -141,9 +144,9 @@ class DatabaseConnection:
             if self.con:
                 self.con.close()
                 print("Database connection closed successfully.")
-        
+
         except sqlite3.Error as e:
             print(f"Error closing the database connection: {e}")
-        
+
         except Exception as e:
             print(f"An unexpected error occurred while closing the connection: {e}")

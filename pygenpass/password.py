@@ -28,6 +28,7 @@ from termcolor import colored
 
 from pygenpass.database import DatabaseConnection
 
+
 db_obj = DatabaseConnection()
 table = BeautifulTable()
 table.left_border_char = "|"
@@ -51,7 +52,6 @@ def all():
         table.append_row([row[0], row[1], row[2], row[3], row[4], row[5]])
     print(table)
     db_obj.close_connection()
-
 
 
 @click.command(help="Delete password")
@@ -97,7 +97,6 @@ def add():
     db_obj.close_connection()
 
 
-
 @click.command(help="Create new password")
 def create():
     """Used for taking input from user to create password"""
@@ -114,7 +113,6 @@ def create():
         portal_url=portal_url,
     )
     db_obj.close_connection()
-
 
 
 @click.command(help="Show password")
